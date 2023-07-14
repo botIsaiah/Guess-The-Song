@@ -1,0 +1,277 @@
+//This is a guess the song app where the user has to guess the Ed Sheeran song that is played
+//once the play button is clicked. The user has 5 attempts to guess the song that is played.
+//On attempt one, only one second of the song plays. On attempt two, two seconds of the song
+//plays. On attempt three, five seconds of the song plays. On attempt four, ten seconds of
+//the song plays. On attempt five, thirty seconds of the song plays.
+//A bar just above the play button fills 
+
+//When the user goes to enter the song in the user input, a dropdown with all
+//Ed Sheeran songs will appear. As the user enters more letters, the number of songs in the
+//dropdown reduces to match the letters entered.
+//If the guess is correct, the user is brought to the answer screen where the song name and
+//artist(s) is displayed. If the guess is incorrect, the guess is displayed on the home page.
+//The user has 5 total attempts to get the song correct. After the five attemtps, the user is
+//brought to the answer screen where the correct song name and artist(s) is displayed.
+
+//The restart button brings the user to the home screen where they can try again.
+//The song trivia button brings the user to a page where more information about the song is
+//displayed.
+//The how to play buttons bring the user to a page where they can read how to play the app.
+//The information buttons bring the user to a page where they can read about the app.
+
+
+//Lists of songs, albums, run time of song, and song release year
+//Variables initialized
+var song = getColumn("Ed Sheeran", "Song");
+var album = getColumn("Ed Sheeran", "Album");
+var runTime = getColumn("Ed Sheeran", "Run Time");
+var yearReleased = getColumn("Ed Sheeran", "Year Released");
+var artist = getColumn("Ed Sheeran", "Artist");
+var url = getColumn("Ed Sheeran", "URL");
+var userInput;
+var random;
+var index;
+var count = 0;
+
+//Empty lists to be filled with elements depending on a random index
+var filteredSong = [];
+var filteredAlbum = [];
+var filteredRunTime = [];
+var filteredYearReleased = [];
+var filteredArtist = [];
+var filteredURL = [];
+
+
+//When the the play button is clicked, a song at a random index will play.
+onEvent("playButton1", "click", function( ) {
+  index = randomNumber(0, url.length - 1);
+  playSound(url[index], false);
+});
+
+//When the the play button is clicked, a song at a random index will play.
+onEvent("playButton2", "click", function( ) {
+  playSound(url[index], false);
+});
+
+//When the answerButton is clicked, the userInput will be cleared. If the user's input is
+//equal to the song name at a random index, the song is stopped and the screen will be changed 
+//to the answer screen. The song label will be set with the song name based on a random index 
+//from the filtered list. The artist label will be set with the artist on the same ID as the
+//song name from the filtered list. If the user's input is not equal to the song name at the
+//random index, the attempt boxes are set to the user's input - depending on the attempt number.
+onEvent("answerButton", "click", function( ) {
+  userInput = getText("userInput");
+  
+  
+  if (userInput == song[index]) {
+    setScreen("answerScreen");
+    setProperty("correct/IncorrectLabel1", "text", "Great job! You knew this Ed Sheeran song!");
+    setProperty("correct/IncorrectLabel2", "text", "You got the Ed Sheeran Heardle!");
+    stopSound(url[index]);
+  } else if ((userInput == "")) {
+    setScreen("homeScreen");
+    count = count + 1;
+    stopSound(url[index]);
+  } else {
+    count = count + 1;
+    stopSound(url[index]);
+  }
+  
+  if (count == 1) {
+    setProperty("attempt1", "text", "SKIP (4)");
+    stopSound(url[index]);
+  } else if (count == 2) {
+    setProperty("attempt2", "text", "SKIP (3)");
+    stopSound(url[index]);
+  } else if (count == 3) {
+    setProperty("attempt3", "text", "SKIP (2)");
+    stopSound(url[index]);
+  } else if (count == 4) {
+    setProperty("attempt4", "text", "SKIP (1)");
+    stopSound(url[index]);
+  } else if (count == 5) {
+    setScreen("answerScreen");
+    stopSound(url[index]);
+  }
+  
+  filter();
+  updateAnswerScreen();
+});
+
+
+//When the restart button is clicked, the user is brought back to the starting screen. The
+//song that is currently playing is stopped and shuffled so that the user can guess a new song.
+//Count is set to zero so that the skip button can restart. All attempt boxes are cleared.
+onEvent("restartButton", "click", function( ) {
+  count = 0;
+  index = "";
+  
+  setScreen("homeScreen");
+  stopSound(url[index]);
+  setProperty("songLabel", "text", "");
+  setProperty("artistLabel", "text", "");
+  setProperty("userInput", "text", "");
+  setProperty("attempt1", "text", "");
+  setProperty("attempt2", "text", "");
+  setProperty("attempt3", "text", "");
+  setProperty("attempt4", "text", "");
+  setProperty("correct/IncorrectLabel1", "text", "");
+  setProperty("correct/IncorrectLabel2", "text", "");
+  
+  filter();
+});
+
+
+//When the skip button is clicked, the song that is currently playing is stopped. The first
+//attempt box text is set to "SKIP (attempts left)". The bar above the play button is filled
+//for each skip or attempt at guessing the song.
+onEvent("skipButton", "click", function( ) {
+  userInput = getText("userInput");
+  count = count + 1;
+  
+  if (count == 1) {
+    setProperty("attempt1", "text", "SKIP (4)");
+    stopSound(url[index]);
+  } else if (count == 2) {
+    setProperty("attempt2", "text", "SKIP (3)");
+    stopSound(url[index]);
+  } else if (count == 3) {
+    setProperty("attempt3", "text", "SKIP (2)");
+    stopSound(url[index]);
+  } else if (count == 4) {
+    setProperty("attempt4", "text", "SKIP (1)");
+    stopSound(url[index]);
+  } else if (count == 5) {
+    setScreen("answerScreen");
+    stopSound(url[index]);
+  }
+  
+  setProperty("songLabel", "text", "");
+  setProperty("artistLabel", "text", "");
+});
+
+
+
+//Filters through each song's information from the data table for each album, run time
+//year released, artist(s), and URL at a random index.
+//Creates a new list of data for the song, album, run time, year released, artust, and URl
+//based on a random index.
+//index {number} - the index number of a song in the dataset "Ed Sheeran"
+function filter(index) {
+ filteredSong = [];
+ filteredAlbum = [];
+ filteredRunTime = [];
+ filteredYearReleased = [];
+ filteredArtist = [];
+ filteredURL = [];
+ for (index=0; index < song.length; index++) {
+ if (userInput[index] == random) {
+ appendItem(filteredSong, song[index]);
+ appendItem(filteredAlbum, album[index]);
+ appendItem(filteredRunTime, runTime[index]);
+ appendItem(filteredYearReleased, yearReleased[index]);
+ appendItem(filteredArtist, artist[index]);
+ appendItem(filteredURL, url[index]);
+ }
+ }
+}
+
+//Code sets the text of a song and the artist(s) of that song based on a random index. 
+function updateAnswerScreen() {
+  setText("songLabel", song[index]);
+  setText("artistLabel", artist[index]);
+}
+
+//Code sets the text of a song's album, run time, and year released based on the song that
+//was played on the home screen.
+function updateTriviaScreen() {
+ setText("albumTriviaLabel", "This song was released on the album " + filteredAlbum[index]);
+ setText("runTimeTriviaLabel", "This song is " + filteredRunTime[index] + " long");
+ setText("yearReleasedTriviaLabel", "This song was released in " + filteredYearReleased[index]);
+}
+
+
+
+
+
+
+//homeScreen Button Functions
+onEvent("informationButton1", "click", function( ) {
+  setScreen("informationScreen1");
+});
+
+onEvent("howToPlayButton1", "click", function( ) {
+  setScreen("howToPlayScreen1");
+});
+
+onEvent("deleteTextButton", "click", function( ) {
+  setText("userInput", "");
+});
+
+onEvent("answerButton", "click", function( ) {
+  setScreen("answerScreen");
+});
+
+
+//informationScreen1 and howToPlayScreen1 Button Functions
+onEvent("returnButton1", "click", function( ) {
+  setScreen("homeScreen");
+});
+
+onEvent("returnButton2", "click", function( ) {
+  setScreen("homeScreen");
+});
+
+
+//answerScreen Button Functions
+onEvent("informationButton2", "click", function( ) {
+  setScreen("informationScreen2");
+});
+
+onEvent("howToPlayButton2", "click", function( ) {
+  setScreen("howToPlayScreen2");
+});
+
+
+//informationScreen2 and howToPlayScreen2 Button Functions
+onEvent("returnButton3", "click", function( ) {
+  setScreen("answerScreen");
+});
+
+
+onEvent("returnButton4", "click", function( ) {
+  setScreen("answerScreen");
+});
+
+//informationScreen3 and howToPlayScreen3 Button Functions
+onEvent("returnButton5", "click", function( ) {
+  setScreen("songTriviaScreen");
+});
+
+onEvent("returnButton6", "click", function( ) {
+  setScreen("songTriviaScreen");
+});
+
+
+//songTriviaScreen Button functions
+//Screen is set to trivia screen. Album label, run time label, and year released label
+//are set to the song that was played on the home screen.
+onEvent("songTriviaButton", "click", function( ) {
+  setScreen("songTriviaScreen");
+  
+  
+  filter();
+  updateTriviaScreen();
+});
+
+onEvent("informationButton3", "click", function( ) {
+  setScreen("informationScreen3");
+});
+
+onEvent("howToPlayButton3", "click", function( ) {
+  setScreen("howToPlayScreen3");
+});
+
+onEvent("returnButton7", "click", function( ) {
+  setScreen("answerScreen");
+});
