@@ -1,3 +1,6 @@
+//App visual. Click "view code" to look at the code.
+//https://studio.code.org/projects/applab/cIsOkfHa5bxZnwaP7KdD0RzNY3tcWcpjiTfy38dL0sE
+
 //This is a guess the song app where the user has to guess the Ed Sheeran song that is played
 //once the play button is clicked. The user has 5 attempts to guess the song that is played.
 //On attempt one, only one second of the song plays. On attempt two, two seconds of the song
